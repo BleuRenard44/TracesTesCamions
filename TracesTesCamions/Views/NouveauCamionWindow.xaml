@@ -41,6 +41,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="120"/>
@@ -74,7 +75,13 @@
         <TextBlock Text="Prochaine révision :" Grid.Row="5" Grid.Column="0" VerticalAlignment="Center"/>
         <DatePicker x:Name="ProchaineRevisionPicker" Grid.Row="5" Grid.Column="1" Margin="5"/>
 
-        <StackPanel Grid.Row="6" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+        <StackPanel Orientation="Horizontal" Margin="0,5,0,0" Grid.Row="6" Grid.ColumnSpan="2">
+            <Label Content="Heure prochaine révision :" VerticalAlignment="Center"/>
+            <TextBox x:Name="HeureProchaineRevisionBox" Width="60" Margin="5,0,0,0" ToolTip="Format HH:mm"/>
+            <TextBlock Text="(HH:mm)" VerticalAlignment="Center" Margin="5,0,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="7" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
             <Button Content="OK" Width="70" Margin="5" IsDefault="True" Click="Ok_Click"/>
             <Button Content="Annuler" Width="70" Margin="5" IsCancel="True"/>
         </StackPanel>

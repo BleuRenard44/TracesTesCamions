@@ -1,0 +1,41 @@
+﻿= TracesTesCamions
+
+TracesTesCamions est une application WPF (.NET 8) pour la gestion d’un parc de camions, le suivi des révisions et la planification automatique des entretiens dans Google Agenda.
+
+== Fonctionnalités
+
+- Ajout, modification et suppression de camions (plaque, marque, nom, année, dates de révision…)
+- Historique des révisions pour chaque véhicule
+- Sauvegarde et chargement des données au format JSON
+- Export de la liste des camions au format CSV
+- Création automatique d’événements de révision (journée entière) dans Google Agenda (compte Google et configuration API requis)
+- Suppression des événements Google Agenda lors de la suppression d’un camion
+- Interface simple et conviviale
+
+== Prérequis
+
+- Windows 10/11 (x64)
+- .NET 8 Runtime (EXE autonome, aucune installation de .NET requise)
+- Compte Google avec Google Agenda activé
+- Fichier `credentials.json` obtenu via Google Cloud Console (voir ci-dessous)
+
+== Utilisation
+
+- Cliquez sur "Nouveau véhicule" pour ajouter un camion
+- Remplissez tous les champs requis (y compris les dates de révision)
+- L’application enregistre le camion et crée un événement de révision dans Google Agenda
+- Vous pouvez consulter, modifier ou supprimer les camions et leurs événements
+- Exportez votre parc au format CSV pour vos rapports
+
+== Licence
+
+Ce projet est fourni à des fins éducatives et non commerciales.
+
+== Crédits
+
+- Utilise Google.Apis.Calendar.v3 pour l’intégration Google Agenda
+- Développé avec .NET 8 et WPF
+
+== Support
+
+Pour toute question ou problème, ouvrez une issue sur le dépôt ou contactez moi.

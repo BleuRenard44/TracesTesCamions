@@ -12,6 +12,7 @@ namespace TracesTesCamions.Models
         public DateTime DateDerniereRevision { get; set; }
         public DateTime DateProchaineRevision { get; set; }
         public string? CalendarEventId { get; set; }
+        public TimeSpan? HeureProchaineRevision { get; set; }
 
         // Historique des révisions
         public List<DateTime> HistoriqueRevisions { get; set; } = new List<DateTime>();

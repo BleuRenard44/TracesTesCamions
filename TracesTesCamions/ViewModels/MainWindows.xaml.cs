@@ -139,7 +139,8 @@ namespace TracesTesCamions
                 System.Windows.MessageBox.Show($"Véhicule enregistré dans :\n{fileName}", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Ajoute un événement de révision au calendrier
-                string eventId = await OutlookCalendarHelper.AddRevisionEventAsync(win.Result.Nom, win.Result.Plaque, win.Result.DateProchaineRevision);
+                string eventId = await OutlookCalendarHelper.AddRevisionEventAsync(
+                    win.Result.Nom, win.Result.Plaque, win.Result.DateProchaineRevision, win.Result.HeureProchaineRevision);
                 win.Result.CalendarEventId = eventId;
 
                 ChargerFichiersJson();

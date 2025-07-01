@@ -46,15 +46,21 @@ namespace TracesTesCamions.Views
                 return;
             }
 
+            if (!TimeSpan.TryParse(HeureProchaineRevisionBox.Text, out var heureProchaineRevision))
+            {
+                MessageBox.Show("Veuillez saisir une heure valide au format HH:mm.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             Result = new Camion
             {
                 Plaque = PlaqueBox.Text.Trim(),
                 Marque = MarqueBox.SelectedItem.ToString()!,
                 Nom = NomBox.Text.Trim(),
-                // On stocke l'année comme DateTime au 1er janvier de l'année choisie
                 DateCreation = new DateTime((int)AnneeCreationBox.SelectedItem, 1, 1),
                 DateDerniereRevision = DerniereRevisionPicker.SelectedDate.Value,
-                DateProchaineRevision = ProchaineRevisionPicker.SelectedDate.Value
+                DateProchaineRevision = ProchaineRevisionPicker.SelectedDate.Value,
+                HeureProchaineRevision = heureProchaineRevision
             };
             DialogResult = true;
         }

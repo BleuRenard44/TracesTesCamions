@@ -46,36 +46,44 @@ namespace TracesTesCamions.Utils
         /// <summary>
         /// Ajoute un événement de révision au calendrier Google et retourne l'ID de l'événement.
         /// </summary>
-        public static async Task<string> AddRevisionEventAsync(string nom, string plaque, DateTime date)
+        public static async Task<string> AddRevisionEventAsync(string nom, string plaque, DateTime date, TimeSpan? heure)
         {
             var service = await GetGoogleCalendarServiceAsync();
 
-            // Format du titre
             string summary = $"Révision : {nom} ({plaque})";
-
-            // Pour un événement sur la journée entière, utiliser la propriété Date (sans heure)
-            var eventDate = date.Date.ToString("yyyy-MM-dd");
+            var startDateTime = date.Date + (heure ?? TimeSpan.Zero);
+            var endDateTime = startDateTime.AddHours(1);
 
             var @event = new Event()
             {
                 Summary = summary,
                 Start = new EventDateTime()
                 {
-                    Date = eventDate,
+                    DateTime = startDateTime,
                     TimeZone = "Europe/Paris",
                 },
                 End = new EventDateTime()
                 {
-                    // Google Calendar considère End comme exclusif, donc +1 jour
-                    Date = date.Date.AddDays(1).ToString("yyyy-MM-dd"),
+                    DateTime = endDateTime,
                     TimeZone = "Europe/Paris",
                 },
+                Reminders = new Event.RemindersData
+                {
+                    UseDefault = false,
+                    Overrides = new[]
+                    {
+                        new EventReminder { Method = "popup", Minutes = 10080 },
+                        new EventReminder { Method = "popup", Minutes = 4320 },
+                        new EventReminder { Method = "popup", Minutes = 1440 },
+                        new EventReminder { Method = "popup", Minutes = 0 }
+                    }
+                }
             };
 
             try
             {
                 var createdEvent = await service.Events.Insert(@event, "primary").ExecuteAsync();
-                Console.WriteLine($"Événement Google (journée complète) créé avec succès. ID : {createdEvent.Id}");
+                Console.WriteLine($"Événement Google (avec heure) créé avec succès. ID : {createdEvent.Id}");
                 return createdEvent.Id;
             }
             catch (Exception ex)
