@@ -1,0 +1,184 @@
+﻿<Window x:Class="TracesTesCamions.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Gestion Maintenance Camions" Height="600" Width="1000"
+        Background="#f4f6fa">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+        <!-- Style bouton moderne, Material Design -->
+        <Style TargetType="Button" x:Key="ModernButton">
+            <Setter Property="Background" Value="#2563eb"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Padding" Value="60,30"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Setter Property="Margin" Value="10,0,0,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#1d4ed8"/>
+                                <Setter TargetName="border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.18"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#0e2a6d"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="border" Property="Background" Value="#cbd5e1"/>
+                                <Setter Property="Foreground" Value="#7b8794"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!-- Ombre douce pour bouton -->
+        <DropShadowEffect x:Key="ButtonShadow" BlurRadius="8" ShadowDepth="1" Opacity="0.10"/>
+        <!-- Style TextBox recherche -->
+        <Style TargetType="TextBox" x:Key="SearchBoxStyle">
+            <Setter Property="Foreground" Value="#333"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocused" Value="True">
+                    <Setter Property="Foreground" Value="#0078D7"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <DockPanel>
+        <!-- Barre d'outils en haut -->
+        <Border Background="White" DockPanel.Dock="Top" Padding="0,0,0,8" BorderBrush="#e0e0e0" BorderThickness="0,0,0,1">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,18,0,0">
+                <Button x:Name="BtnNouveaux" Content="Nouveaux" Click="BtnNouveaux_Click" Style="{StaticResource ModernButton}" Margin="0,0,12,0"/>
+                <Button x:Name="BtnHistorique" Content="Historique" Click="BtnHistorique_Click" Style="{StaticResource ModernButton}" Margin="0,0,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Barre de recherche et export -->
+        <Border Background="White" CornerRadius="20" Padding="10,4" BorderBrush="#bbb" BorderThickness="1"
+                Margin="0,18,40,0" HorizontalAlignment="Right" Width="350" DockPanel.Dock="Top">
+            <DockPanel>
+                <TextBlock Text="🔍" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <TextBox x:Name="RechercheBox"
+                         TextChanged="RechercheBox_TextChanged"
+                         Width="160"
+                         Style="{StaticResource SearchBoxStyle}"
+                         ToolTip="Rechercher par plaque, nom ou marque"
+                         />
+                <Button Content="Exporter en CSV"
+                        Click="ExporterCsv_Click"
+                        Margin="10,0,0,0"
+                        Style="{StaticResource ModernButton}"/>
+            </DockPanel>
+        </Border>
+
+        <!-- Popups centrés sous les boutons -->
+        <Popup x:Name="PopupNouveaux"
+               PlacementTarget="{Binding ElementName=BtnNouveaux}"
+               Placement="Bottom"
+               StaysOpen="False"
+               AllowsTransparency="True"
+               PopupAnimation="Fade">
+            <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="20" CornerRadius="8" >
+                <StackPanel>
+                    <TextBlock Text="Nouveaux" FontWeight="Bold" FontSize="16" Margin="5"/>
+                    <Separator/>
+                    <Button Content="Nouveau jeu de données" Margin="5" Click="NouveauJeuDeDonnees_Click" Style="{StaticResource ModernButton}"/>
+                    <Button Content="Nouveau véhicule" Margin="5" Click="NouveauVehicule_Click" Style="{StaticResource ModernButton}"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+        <Popup x:Name="PopupHistorique"
+               PlacementTarget="{Binding ElementName=BtnHistorique}"
+               Placement="Bottom"
+               StaysOpen="False"
+               AllowsTransparency="True"
+               PopupAnimation="Fade">
+            <Border Background="White" BorderBrush="Blue" BorderThickness="2" Padding="20" CornerRadius="8">
+                <StackPanel>
+                    <TextBlock Text="Historique" FontWeight="Bold" FontSize="16" Margin="5"/>
+                    <Separator/>
+                    <ListBox ItemsSource="{Binding Camions}" 
+                             SelectionChanged="FichierJson_SelectionChanged"
+                             Width="350" Height="200" Margin="5">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <Run Text="{Binding Nom}" />
+                                    <Run Text=" (" />
+                                    <Run Text="{Binding Plaque}" />
+                                    <Run Text=")" />
+                                </TextBlock>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </Border>
+        </Popup>
+
+            <!-- Tableau principal -->
+        <DataGrid x:Name="VehiculesGrid"
+                  ItemsSource="{Binding Camions}"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  IsReadOnly="True"
+                  SelectionMode="Single"
+                  Margin="40,20,40,40"
+                  RowHeight="36"
+                  FontSize="15"
+                  GridLinesVisibility="Horizontal"
+                  HeadersVisibility="Column"
+                  VerticalAlignment="Stretch"
+                  HorizontalAlignment="Stretch">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Plaque" Binding="{Binding Plaque}" Width="*" />
+                <DataGridTextColumn Header="Dernière révision" Binding="{Binding DateDerniereRevision, StringFormat='dd/MM/yy'}" Width="*" />
+                <DataGridTextColumn Header="Prochaine révision" Binding="{Binding DateProchaineRevision, StringFormat='dd/MM/yy'}" Width="*" />
+                <DataGridTextColumn Header="Marque" Binding="{Binding Marque}" Width="*" />
+                <DataGridTextColumn Header="Nom" Binding="{Binding Nom}" Width="*" />
+                <DataGridTextColumn Header="Date de création" Binding="{Binding DateCreation, StringFormat='dd/MM/yy'}" Width="*" />
+                <DataGridTextColumn Header="Année de création" Binding="{Binding DateCreation, StringFormat='yyyy'}" Width="*" />
+                <DataGridTemplateColumn Header="Ajouter révision">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Style="{StaticResource ModernButton}">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="➕" FontSize="18" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Ajouter"/>
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Supprimer">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Supprimer" Click="SupprimerVehicule_Click" Style="{StaticResource ModernButton}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</Window>

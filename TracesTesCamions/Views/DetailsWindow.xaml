@@ -1,0 +1,23 @@
+﻿<Window x:Class="TracesTesCamions.Views.DetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Detail du vehicule" Height="220" Width="350" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="{Binding Plaque}" FontWeight="Bold" FontSize="18" Grid.Row="0" Margin="0,0,0,10"/>
+        <TextBlock Text="{Binding DateDerniereRevision, StringFormat='Derniere revision : {0:d}'}" Grid.Row="1" Margin="0,0,0,5"/>
+        <TextBlock Text="{Binding DateProchaineRevision, StringFormat='Prochaine revision : {0:d}'}" Grid.Row="2"/>
+        <ListBox ItemsSource="{Binding HistoriqueRevisions}" Grid.Row="3" Margin="0,10,0,0">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding StringFormat='Révision le {0:d}'}"/>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</Window>
