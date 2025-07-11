@@ -1,4 +1,4 @@
-﻿= TracesTesCamions
+= TracesTesCamions
 
 TracesTesCamions est une application WPF (.NET 8) pour la gestion d’un parc de camions, le suivi des révisions et la planification automatique des entretiens dans Google Agenda.
 
@@ -18,6 +18,28 @@ TracesTesCamions est une application WPF (.NET 8) pour la gestion d’un parc de
 - .NET 8 Runtime (EXE autonome, aucune installation de .NET requise)
 - Compte Google avec Google Agenda activé
 - Fichier `credentials.json` obtenu via Google Cloud Console (voir ci-dessous)
+
+== Intégration Google Agenda
+
+1. Rendez-vous sur https://console.cloud.google.com/
+2. Créez un projet et activez l’API "Google Calendar"
+3. Allez dans "APIs & Services" > "Identifiants"
+4. Créez des identifiants OAuth 2.0 pour "Application de bureau"
+5. Téléchargez le fichier `credentials.json` et placez-le à côté de l’EXE de l’application
+6. Au premier lancement, une fenêtre de navigateur s’ouvrira pour autoriser l’accès à votre agenda Google
+
+== Compilation & Exécution
+
+. Clonez le dépôt
+. Ouvrez un terminal dans le dossier du projet
+. Publiez l’application en EXE autonome :
++
+----
+dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
+----
+. Retrouvez l’EXE dans `bin/Release/net8.0-windows/win-x64/publish/`
+. Placez votre `credentials.json` dans ce dossier
+. Lancez `TracesTesCamions.exe`
 
 == Utilisation
 
