@@ -60,7 +60,7 @@ namespace TracesTesCamions.Views
             _camion.HeureProchaineRevision = NouvelleHeureProchaineRevision;
 
             // Mets à jour l'événement Outlook
-            string eventId = await OutlookCalendarHelper.AddRevisionEventAsync(
+            string eventId = await GoogleCalendarHelper.AddRevisionEventAsync(
                 _camion.Nom,
                 _camion.Plaque,
                 _camion.DateProchaineRevision,

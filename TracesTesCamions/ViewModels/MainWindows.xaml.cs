@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Forms;
 using TracesTesCamions.Models;
 using TracesTesCamions.Views;
 using TracesTesCamions.Utils;
-using Microsoft.Graph;
-using Microsoft.Identity.Client;
+using System.Diagnostics;
 
 namespace TracesTesCamions
 {
@@ -139,7 +135,7 @@ namespace TracesTesCamions
                 System.Windows.MessageBox.Show($"Véhicule enregistré dans :\n{fileName}", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 // Ajoute un événement de révision au calendrier
-                string eventId = await OutlookCalendarHelper.AddRevisionEventAsync(
+                string eventId = await GoogleCalendarHelper.AddRevisionEventAsync(
                     win.Result.Nom, win.Result.Plaque, win.Result.DateProchaineRevision, win.Result.HeureProchaineRevision);
                 win.Result.CalendarEventId = eventId;
 
@@ -224,7 +220,7 @@ namespace TracesTesCamions
 
                     // Supprime l'événement du calendrier si nécessaire
                     if (!string.IsNullOrEmpty(selectedCamion.CalendarEventId))
-                        await OutlookCalendarHelper.DeleteEventAsync(selectedCamion.CalendarEventId);
+                        await GoogleCalendarHelper.DeleteEventAsync(selectedCamion.CalendarEventId);
 
                     VehiculesGrid.Items.Refresh();
                 }
@@ -311,5 +307,34 @@ namespace TracesTesCamions
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string name) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            string currentVersion = System.Reflection.Assembly
+                .GetExecutingAssembly()
+                .GetName()
+                .Version?.ToString() ?? "0.0.0";
+
+            var update = await UpdateChecker.CheckForUpdateAsync(currentVersion);
+
+            if (update != null)
+            {
+                var asset = update.Assets.FirstOrDefault(a => a.Name.EndsWith(".exe") || a.Name.EndsWith(".zip"));
+                if (asset == null)
+                    return;
+
+                var result = System.Windows.MessageBox.Show(
+                    $"Une mise à jour ({update.Tag_name}) est disponible.\n\nVoulez-vous l'installer maintenant ?",
+                    "Mise à jour disponible",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Information);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    string expectedExeName = Path.GetFileName(Process.GetCurrentProcess().MainModule!.FileName!);
+                    await UpdaterHelper.DownloadAndReplaceAsync(asset.Browser_download_url, expectedExeName);
+                }
+            }
+        }
     }
 }

@@ -1,0 +1,27 @@
+<Window x:Class="TracesTesCamions.Views.UpdateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Mise a jour disponible" Height="200" Width="400" WindowStartupLocation="CenterOwner">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Une mise a jour est disponible !" FontWeight="Bold" FontSize="16" Grid.Row="0" Margin="0 0 0 10"/>
+
+        <StackPanel Grid.Row="1" Orientation="Vertical" Margin="0 0 0 10">
+            <TextBlock Text="{Binding CurrentVersion}" />
+            <TextBlock Text="{Binding LatestVersion}" />
+        </StackPanel>
+
+        <TextBlock Text="Souhaitez-vous l'installer maintenant ?" Grid.Row="2" Margin="0 0 0 10"/>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Annuler" Width="80" Margin="0 0 10 0" Click="Cancel_Click"/>
+            <Button Content="Mettre a jour" Width="100" Click="Update_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
