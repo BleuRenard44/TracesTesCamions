@@ -1,4 +1,4 @@
-\*Type Financement :
+*Type Financement :
 
 
 
@@ -91,7 +91,7 @@ Date achat :
 
 
 
-\*\*Journal dépense / tableau de bord\*\*
+**Journal dépense / tableau de bord**
 
 
 
@@ -102,7 +102,7 @@ Date achat :
 
 
 
-\*\*Suivi parc auto\*\*
+**Suivi parc auto**
 
 
 
@@ -115,7 +115,7 @@ Date achat :
 
 
 
-\*\*Paramètres\*\*
+**Paramètres**
 
 
 
@@ -126,7 +126,7 @@ Date achat :
 
 
 
-\*\*Tableau de bord\*\*
+**Tableau de bord**
 
 
 
@@ -134,9 +134,9 @@ Date achat :
 * Filtre par année / par mois
 * Type de financement
 * Type de dépense ( reprendre tous les changements effectuées )
-* \*\*Infos pour la flotte complète\*\*
+* **Infos pour la flotte complète**
 * Nombre de véhicules par catégorie ( minibus, camion, voitures ... ) avec pourcentage
-* \*\*Par plaque\*\*
+* **Par plaque**
 * Prix maintenance, prix pneumatique, prix consommable (freins, vidange)
-* \*\*ALL\*\*
+* **ALL**
 * Visualisation Total AVEC graph et nombre

@@ -113,7 +113,7 @@ namespace TracesTesCamions
                 return;
             }
 
-            var win = new NouveauCamionWindow { Owner = this };
+            var win = new NouveauCamionWindow(currentDataFolder) { Owner = this };
             if (win.ShowDialog() == true && win.Result != null)
             {
                 // Ajoute la date de révision à l’historique
@@ -257,7 +257,7 @@ namespace TracesTesCamions
             if (listBox?.SelectedItem is Camion selectedCamion)
             {
                 // Affiche les infos dans une nouvelle fenêtre ou une page dédiée
-                var detailsWindow = new DetailsWindow(selectedCamion) { Owner = this };
+                var detailsWindow = new DetailsWindow(selectedCamion, currentDataFolder) { Owner = this };
                 detailsWindow.ShowDialog();
             }
         }
