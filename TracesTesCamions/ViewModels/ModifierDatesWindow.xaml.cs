@@ -39,7 +39,6 @@ namespace TracesTesCamions.Views
             NouvelleDerniereRevision = DerniereRevisionPicker.SelectedDate.Value;
             NouvelleProchaineRevision = ProchaineRevisionPicker.SelectedDate.Value;
 
-            // Validation et parsing de l'heure
             if (!string.IsNullOrWhiteSpace(HeureProchaineRevisionBox.Text))
             {
                 if (!TimeSpan.TryParse(HeureProchaineRevisionBox.Text, out var heure))
@@ -54,21 +53,37 @@ namespace TracesTesCamions.Views
                 NouvelleHeureProchaineRevision = null;
             }
 
-            // Mets à jour les propriétés du camion
             _camion.DateDerniereRevision = NouvelleDerniereRevision;
             _camion.DateProchaineRevision = NouvelleProchaineRevision;
             _camion.HeureProchaineRevision = NouvelleHeureProchaineRevision;
 
-            // Mets à jour l'événement Outlook
-            string eventId = await GoogleCalendarHelper.AddRevisionEventAsync(
-                _camion.Nom,
-                _camion.Plaque,
-                _camion.DateProchaineRevision,
-                _camion.HeureProchaineRevision
-            );
-            _camion.CalendarEventId = eventId;
+            try
+            {
+                // Supprimer l'ancien événement s'il existe
+                if (!string.IsNullOrEmpty(_camion.CalendarEventId))
+                {
+                    await GoogleCalendarHelper.DeleteEventAsync(_camion.CalendarEventId);
+                }
+
+                // Ajouter le nouvel événement
+                string eventId = await GoogleCalendarHelper.AddRevisionEventAsync(
+                    _camion.Nom,
+                    _camion.Plaque,
+                    _camion.DateProchaineRevision,
+                    _camion.HeureProchaineRevision
+                );
+
+                _camion.CalendarEventId = eventId;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de la mise à jour du calendrier : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                return; // Ne ferme pas la fenêtre si erreur
+            }
 
             DialogResult = true;
+            Close();
         }
+
     }
 }

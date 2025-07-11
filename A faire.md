@@ -1,0 +1,142 @@
+\*Type Financement :
+
+
+
+* Achat
+* Leasing
+* Location
+
+
+
+Type de véhicule :
+
+
+
+* Autobus
+* Camion
+* Camion Frigorifique
+* Camion Plateau
+* Camion semi-remorque
+* Camion Citerne
+* Clark
+* Fourgon réfrigéré
+* Fourgonette
+* Minibus
+* Pick-up
+* Tracteur
+* Voiture Tourisme
+
+
+
+Marque :
+
+
+
+* toutes les marques
+
+
+
+Type de dépense :
+
+
+
+* Pneumatique
+* Réparation
+* Vidange
+* Freins
+
+
+
+Type alertes :
+
+
+
+* Fin de contrôle technique
+
+
+
+Type de maintenace :
+
+
+
+* 5000km a 25000KM 5 par 5
+
+
+
+Entreprise Maintenance :
+
+
+
+* 6 voir plus (volet options pour ajouter et supprimer des entreprise, pouvoir exporter uniquement les véhicule de 	l'entreprise)
+
+
+
+Nombres interventions classées par mois ( voir intervention, pneumatique, vidange, freins. visu par mois avec graphique si 	possible,  )
+
+
+
+Tableau de bord avec suivi parc auto, suivi dépense, avec menu organisées
+
+
+
+Date achat :
+
+
+
+* Quand il a été acheté
+
+
+
+
+
+
+
+\*\*Journal dépense / tableau de bord\*\*
+
+
+
+* Date
+* Plaque
+* Type véhicule ( Marque, nom, type d'énergie )
+* Kilométrage
+
+
+
+\*\*Suivi parc auto\*\*
+
+
+
+* Plaque
+* Type véhicule ( Marque, nom, type d'énergie )
+* Kilométrage innitial
+* Date control tech ( ancien | nouveaux )
+* Commentaire
+* Type d'intervention ( type de dépense / faire un historique par véhicule)
+
+
+
+\*\*Paramètres\*\*
+
+
+
+* Ajouter, Supprimer, Modifier les entreprises ( nom entreprise, nom responsable de l'entreprise + nom contacte 	gestionnaire de flotte, téléphone, mail, contact )
+* Pouvoir rajoute des marques en plus ( Marque de véhicule + Marque de pneumatique )
+* Lors de la création du véhicule, obligation d'avoir un fichier image de la carte grise affilié au véhicule et stocker 	dans le dossier de l'app puis ~/doc
+* Demander ou a été fais l'intervention ( zone / villes : a noter par le user )
+
+
+
+\*\*Tableau de bord\*\*
+
+
+
+* Info de la flotte ( nombre de véhicule, age moyen )
+* Filtre par année / par mois
+* Type de financement
+* Type de dépense ( reprendre tous les changements effectuées )
+* \*\*Infos pour la flotte complète\*\*
+* Nombre de véhicules par catégorie ( minibus, camion, voitures ... ) avec pourcentage
+* \*\*Par plaque\*\*
+* Prix maintenance, prix pneumatique, prix consommable (freins, vidange)
+* \*\*ALL\*\*
+* Visualisation Total AVEC graph et nombre

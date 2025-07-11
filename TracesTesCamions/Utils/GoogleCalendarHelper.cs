@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace TracesTesCamions.Utils
 {
@@ -25,7 +26,11 @@ namespace TracesTesCamions.Utils
             UserCredential credential;
             using (FileStream stream = new FileStream("credentials.json", FileMode.Open, FileAccess.Read))
             {
-                string credPath = "token.json";
+                string credPath = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "TracesTesCamions", "GoogleToken");
+                Directory.CreateDirectory(Path.GetDirectoryName(credPath)!);
+
                 credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                     GoogleClientSecrets.Load(stream).Secrets,
                     new[] { CalendarService.Scope.Calendar },
@@ -88,7 +93,7 @@ namespace TracesTesCamions.Utils
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erreur lors de la création de l'événement Google : {ex.Message}");
+                System.Windows.MessageBox.Show($"Erreur Google OAuth : {ex.Message}", "Erreur Google", MessageBoxButton.OK, MessageBoxImage.Error);
                 throw;
             }
         }
@@ -99,17 +104,72 @@ namespace TracesTesCamions.Utils
         public static async Task DeleteEventAsync(string eventId)
         {
             var service = await GetGoogleCalendarServiceAsync();
+            string calendarId = "primary";
 
             try
             {
-                await service.Events.Delete("primary", eventId).ExecuteAsync();
-                Console.WriteLine($"Événement Google avec l'ID {eventId} supprimé avec succès.");
+                var calendarService = await GetGoogleCalendarServiceAsync();
+                string userCalendarId = "primary";
+
+                // Récupère l'événement
+                var getRequest = calendarService.Events.Get(userCalendarId, eventId);
+                var existingEvent = await getRequest.ExecuteAsync();
+
+                // Supprime l'événement
+                var deleteRequest = calendarService.Events.Delete(userCalendarId, eventId);
+                await deleteRequest.ExecuteAsync();
             }
-            catch (Exception ex)
+            catch (Google.GoogleApiException ex)
             {
-                Console.WriteLine($"Erreur lors de la suppression de l'événement Google : {ex.Message}");
+                // Ignore si l’événement est introuvable
+                if (ex.HttpStatusCode != System.Net.HttpStatusCode.NotFound)
+                    throw;
+            }
+        }
+
+        public static async Task EnsureGoogleAuthAsync()
+        {
+            await GetGoogleCalendarServiceAsync();
+        }
+
+        public static async Task<bool> UpdateEventAsync(string eventId, string nom, string plaque, DateTime date, TimeSpan? heure)
+        {
+            try
+            {
+                var service = await GetGoogleCalendarServiceAsync();
+
+                // Récupère l'événement existant
+                var existingEvent = await service.Events.Get("primary", eventId).ExecuteAsync();
+                if (existingEvent == null) return false;
+
+                // Modifie les champs
+                existingEvent.Summary = $"Révision - {nom} ({plaque})";
+
+                if (heure.HasValue)
+                {
+                    var dateTime = date.Date + heure.Value;
+                    existingEvent.Start = new EventDateTime { DateTime = dateTime, TimeZone = "Europe/Paris" };
+                    existingEvent.End = new EventDateTime { DateTime = dateTime.AddHours(1), TimeZone = "Europe/Paris" };
+                }
+                else
+                {
+                    existingEvent.Start = new EventDateTime { Date = date.ToString("yyyy-MM-dd") };
+                    existingEvent.End = new EventDateTime { Date = date.ToString("yyyy-MM-dd") };
+                }
+
+                // Met à jour l'événement
+                await service.Events.Update(existingEvent, "primary", eventId).ExecuteAsync();
+                return true;
+            }
+            catch (Google.GoogleApiException ex)
+            {
+                if (ex.HttpStatusCode == System.Net.HttpStatusCode.NotFound)
+                    return false;
+
                 throw;
             }
         }
+
+
     }
 }

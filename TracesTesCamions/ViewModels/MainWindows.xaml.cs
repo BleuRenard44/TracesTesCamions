@@ -143,18 +143,6 @@ namespace TracesTesCamions
             }
         }
 
-        // Nouvelle plaque : exemple d'action
-        private void NouvellePlaque_Click(object sender, RoutedEventArgs e)
-        {
-            System.Windows.MessageBox.Show("Action Nouvelle plaque à implémenter.", "Info");
-        }
-
-        // Nouvel événement : exemple d'action
-        private void NouvelEvenement_Click(object sender, RoutedEventArgs e)
-        {
-            System.Windows.MessageBox.Show("Action Nouvel événement à implémenter.", "Info");
-        }
-
         private void ModifierVehicule_Click(object sender, RoutedEventArgs e)
         {
             if (VehiculesGrid.SelectedItem is Camion selectedCamion)
@@ -315,26 +303,47 @@ namespace TracesTesCamions
                 .GetName()
                 .Version?.ToString() ?? "0.0.0";
 
-            var update = await UpdateChecker.CheckForUpdateAsync(currentVersion);
-
-            if (update != null)
+            try
             {
-                var asset = update.Assets.FirstOrDefault(a => a.Name.EndsWith(".exe") || a.Name.EndsWith(".zip"));
-                if (asset == null)
-                    return;
+                var update = await UpdateChecker.CheckForUpdateAsync(currentVersion);
 
-                var result = System.Windows.MessageBox.Show(
-                    $"Une mise à jour ({update.Tag_name}) est disponible.\n\nVoulez-vous l'installer maintenant ?",
-                    "Mise à jour disponible",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Information);
-
-                if (result == MessageBoxResult.Yes)
+                if (update != null)
                 {
-                    string expectedExeName = Path.GetFileName(Process.GetCurrentProcess().MainModule!.FileName!);
-                    await UpdaterHelper.DownloadAndReplaceAsync(asset.Browser_download_url, expectedExeName);
+                    var asset = update.Assets.FirstOrDefault(a => a.Name.EndsWith(".exe") || a.Name.EndsWith(".zip"));
+                    if (asset != null)
+                    {
+                        var result = System.Windows.MessageBox.Show(
+                            $"Une mise à jour ({update.Tag_name}) est disponible.\n\nVoulez-vous l'installer maintenant ?",
+                            "Mise à jour disponible",
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Information);
+
+                        if (result == MessageBoxResult.Yes)
+                        {
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = asset.Browser_download_url,
+                                UseShellExecute = true
+                            });
+                        }
+                    }
                 }
             }
+            catch
+            {
+                // Ne rien faire si la connexion échoue (mode silencieux)
+            }
+
+            try
+            {
+                await GoogleCalendarHelper.EnsureGoogleAuthAsync();
+                System.Windows.MessageBox.Show("Connecté à Google avec succès.", "Authentification", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Erreur d'authentification Google : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
+
     }
 }

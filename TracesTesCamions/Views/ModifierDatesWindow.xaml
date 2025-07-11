@@ -1,7 +1,7 @@
 ﻿<Window x:Class="TracesTesCamions.Views.ModifierDatesWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Modifier les dates de revision" Height="200" Width="350" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+        Title="Modifier les dates de revision" Height="220" Width="350" WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
