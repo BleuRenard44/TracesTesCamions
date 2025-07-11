@@ -1,3 +1,5 @@
+
+
 \*Type Financement :
 
 
@@ -135,8 +137,18 @@ Date achat :
 * Type de financement
 * Type de dépense ( reprendre tous les changements effectuées )
 * \*\*Infos pour la flotte complète\*\*
+
 * Nombre de véhicules par catégorie ( minibus, camion, voitures ... ) avec pourcentage
 * \*\*Par plaque\*\*
 * Prix maintenance, prix pneumatique, prix consommable (freins, vidange)
 * \*\*ALL\*\*
 * Visualisation Total AVEC graph et nombre
+
+**Mail automatique au entreprise**
+
+* Par entreprise, envoyer automatiquement 1 mois a l'avance un mail
+* Prévenir l'entreprise de prendre rdv en donnant tous les véhicules concérné par le controle technique de l'entreprise spécifiquement avec le jour par véhicule :
+
+Plaque, Marque, Nom, Date de révision
+
+****
