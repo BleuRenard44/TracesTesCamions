@@ -1,19 +1,22 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms;
+using TracesTesCamions.Data;
 using TracesTesCamions.Models;
-using TracesTesCamions.Views;
 using TracesTesCamions.Utils;
-using System.Diagnostics;
+using TracesTesCamions.Views;
 
 namespace TracesTesCamions
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private ObservableCollection<Camion> camions = new ObservableCollection<Camion>();
+        private ConfigurationData? config;
         private string? currentDataFolder = null;
         private readonly string configPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -48,23 +51,39 @@ namespace TracesTesCamions
             {
                 if (File.Exists(configPath))
                 {
-                    currentDataFolder = File.ReadAllText(configPath);
+                    var json = File.ReadAllText(configPath);
+                    config = JsonSerializer.Deserialize<ConfigurationData>(json);
+                    currentDataFolder = config?.CurrentDataFolder;
                 }
             }
-            catch { /* Ignorer les erreurs de lecture */ }
+            catch
+            {
+                // Ignorer les erreurs de lecture
+                config = new ConfigurationData(currentDataFolder ?? "");
+            }
         }
+
 
         private void SaveDataFolder()
         {
             try
             {
+                config = new ConfigurationData(currentDataFolder ?? "");
+                config.CurrentDataFolder = currentDataFolder;
+
                 var dir = Path.GetDirectoryName(configPath);
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir!);
-                File.WriteAllText(configPath, currentDataFolder ?? "");
+
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                File.WriteAllText(configPath, JsonSerializer.Serialize(config, options));
             }
-            catch { /* Ignorer les erreurs d'écriture */ }
+            catch
+            {
+                // Ignorer les erreurs d'écriture
+            }
         }
+
 
         private void BtnNouveaux_Click(object sender, RoutedEventArgs e)
         {
@@ -113,7 +132,7 @@ namespace TracesTesCamions
                 return;
             }
 
-            var win = new NouveauCamionWindow(currentDataFolder) { Owner = this };
+            var win = new NouveauCamionWindow(currentDataFolder, config) { Owner = this };
             if (win.ShowDialog() == true && win.Result != null)
             {
                 // Ajoute la date de révision à l’historique
@@ -259,7 +278,10 @@ namespace TracesTesCamions
                 // Affiche les infos dans une nouvelle fenêtre ou une page dédiée
                 var detailsWindow = new DetailsWindow(selectedCamion, currentDataFolder) { Owner = this };
                 detailsWindow.ShowDialog();
+                
             }
+
+            listBox.SelectedItem = null;
         }
 
         private void RechercheBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -343,6 +365,132 @@ namespace TracesTesCamions
             {
                 System.Windows.MessageBox.Show($"Erreur d'authentification Google : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+        private void FichierJson_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem && menuItem.DataContext is Camion selectedCamion)
+            {
+                try
+                {
+                    var detailsWindow = new DetailsWindow(selectedCamion, currentDataFolder)
+                    {
+                        Owner = this
+                    };
+                    detailsWindow.ShowDialog();
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.MessageBox.Show($"Erreur lors de l'ouverture du camion : {ex.Message}");
+                }
+            }
+        }
+
+        private void GererEntreprises_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(currentDataFolder) || !Directory.Exists(currentDataFolder))
+            {
+                System.Windows.MessageBox.Show("Veuillez d'abord choisir un dossier de données.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var entreprises = new ObservableCollection<Entreprise>();
+            var fichierPath = Path.Combine(currentDataFolder, "entreprises.json");
+            if (File.Exists(fichierPath))
+            {
+                var data = JsonSerializer.Deserialize<Entreprise[]>(File.ReadAllText(fichierPath));
+                if (data != null)
+                {
+                }
+            }
+
+            var entreprisesWindow = new GererEntreprisesWindow(entreprises, currentDataFolder);
+
+            {
+            };
+            entreprisesWindow.ShowDialog();
+            RechargerConfiguration();
+        }
+
+        private void GererMarques_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(currentDataFolder) || !Directory.Exists(currentDataFolder))
+            {
+                System.Windows.MessageBox.Show("Veuillez d'abord choisir un dossier de données.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var marquesVeh = new ObservableCollection<string>();
+            var marquesPneu = new ObservableCollection<string>();
+
+            var fileVeh = Path.Combine(currentDataFolder, "marquesVehicule.json");
+            var filePneu = Path.Combine(currentDataFolder, "marquesPneu.json");
+
+            if (File.Exists(fileVeh))
+            {
+                var data = JsonSerializer.Deserialize<string[]>(File.ReadAllText(fileVeh));
+                if (data != null)
+                {
+                    foreach (var m in data)
+                        marquesVeh.Add(m);
+                }
+            }
+
+            if (File.Exists(filePneu))
+            {
+                var data = JsonSerializer.Deserialize<string[]>(File.ReadAllText(filePneu));
+                if (data != null)
+                {
+                    foreach (var m in data)
+                        marquesPneu.Add(m);
+                }
+            }
+
+            var marquesWindow = new GererMarquesWindow(marquesVeh, marquesPneu, currentDataFolder)
+            {
+                Owner = this
+            };
+            marquesWindow.ShowDialog();
+            RechargerConfiguration();
+        }
+
+        private void GererTypesDepense_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(currentDataFolder) || !Directory.Exists(currentDataFolder))
+            {
+                System.Windows.MessageBox.Show("Veuillez d'abord choisir un dossier de données.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var typesDepense = new ObservableCollection<string>();
+            var fichierPath = Path.Combine(currentDataFolder, "typesDepense.json");
+            if (File.Exists(fichierPath))
+            {
+                var data = JsonSerializer.Deserialize<string[]>(File.ReadAllText(fichierPath));
+                if (data != null)
+                {
+                    foreach (var t in data)
+                        typesDepense.Add(t);
+                }
+            }
+
+            var window = new GererTypesDepenseWindow(typesDepense, currentDataFolder)
+            {
+                Owner = this
+            };
+            window.ShowDialog();
+
+            RechargerConfiguration();
+        }
+
+        private void RechargerConfiguration()
+        {
+            if (string.IsNullOrEmpty(currentDataFolder) || !Directory.Exists(currentDataFolder))
+                return;
+
+            config = new ConfigurationData(currentDataFolder);
+            config.LoadAll();
+
+            System.Windows.MessageBox.Show("Configuration rechargée avec succès.", "Chargement", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
     }

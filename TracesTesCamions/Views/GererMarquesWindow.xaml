@@ -1,0 +1,31 @@
+<Window x:Class="TracesTesCamions.Views.GererMarquesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Gerer marques" Height="400" Width="600" WindowStartupLocation="CenterOwner">
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Marques vehicules et pneumatiques" FontSize="16" FontWeight="Bold"/>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <GroupBox Header="Marques vehicules" Margin="5">
+                <ListBox x:Name="ListMarquesVehicule"/>
+            </GroupBox>
+            <GroupBox Header="Marques pneumatique" Grid.Column="1" Margin="5">
+                <ListBox x:Name="ListMarquesPneumatique"/>
+            </GroupBox>
+        </Grid>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
+            <Button Content="Ajouter vehicule" Click="AjouterVehicule_Click" Width="140"/>
+            <Button Content="Supprimer vehicule" Click="SupprimerVehicule_Click" Width="140"/>
+            <Button Content="Ajouter pneu" Click="AjouterPneu_Click" Width="140"/>
+            <Button Content="Supprimer pneu" Click="SupprimerPneu_Click" Width="140"/>
+        </StackPanel>
+    </Grid>
+</Window>

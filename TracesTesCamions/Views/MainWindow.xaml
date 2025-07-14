@@ -4,6 +4,7 @@
         Title="Traces Tes Camions" Height="600" Width="1000"
         Background="#f4f6fa"
         Loaded="MainWindow_Loaded">
+
     <Window.Resources>
         <Style TargetType="Button">
             <Setter Property="Margin" Value="5"/>
@@ -66,40 +67,76 @@
             </Style.Triggers>
         </Style>
     </Window.Resources>
-    <DockPanel>
-        <!-- Barre d'outils en haut -->
-        <Border Background="White" DockPanel.Dock="Top" Padding="0,0,0,8" BorderBrush="#e0e0e0" BorderThickness="0,0,0,1">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,18,0,0">
-                <Button x:Name="BtnNouveaux" Content="Nouveaux" Click="BtnNouveaux_Click" Style="{StaticResource ModernButton}" Margin="0,0,12,0"/>
-                <Button x:Name="BtnHistorique" Content="Historique" Click="BtnHistorique_Click" Style="{StaticResource ModernButton}" Margin="0,0,0,0"/>
-            </StackPanel>
-        </Border>
 
-        <!-- Barre de recherche et export -->
+    <DockPanel>
+
+        <!-- Barre de menus classique en haut -->
+        <Menu DockPanel.Dock="Top" Background="White" BorderBrush="#e0e0e0" BorderThickness="0,0,0,1" Height="35" FontSize="14" FontWeight="SemiBold">
+            <MenuItem Header="_Fichier">
+                <MenuItem Header="Nouveau véhicule" Click="NouveauVehicule_Click"/>
+                <MenuItem Header="Nouveau jeu de données" Click="NouveauJeuDeDonnees_Click"/>
+                <Separator/>
+                <MenuItem Header="Exporter en CSV" Click="ExporterCsv_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Historique">
+                <MenuItem Header="Liste des véhicules">
+                    <MenuItem.ItemsSource>
+                        <Binding Path="Camions" />
+                    </MenuItem.ItemsSource>
+
+                    <!-- TEMPLATE pour afficher Marque Nom (Plaque) -->
+                    <MenuItem.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding Marque}" FontWeight="Bold" Margin="0,0,5,0"/>
+                                <TextBlock Text="{Binding Nom}" Margin="0,0,5,0"/>
+                                <TextBlock Text="(" />
+                                <TextBlock Text="{Binding Plaque}" />
+                                <TextBlock Text=")" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </MenuItem.ItemTemplate>
+
+                    <!-- Style pour gérer le clic -->
+                    <MenuItem.ItemContainerStyle>
+                        <Style TargetType="MenuItem">
+                            <EventSetter Event="Click" Handler="FichierJson_Click"/>
+                        </Style>
+                    </MenuItem.ItemContainerStyle>
+
+                </MenuItem>
+            </MenuItem>
+            
+            <MenuItem Header="_Paramètres">
+                <MenuItem Header="Gérer les entreprises" Click="GererEntreprises_Click"/>
+                <MenuItem Header="Gérer les marques" Click="GererMarques_Click"/>
+                <MenuItem Header="Gérer les types de dépense" Click="GererTypesDepense_Click"/>
+            </MenuItem>
+
+
+
+        </Menu>
+
+        <!-- Barre de recherche à droite sous le menu -->
         <Border Background="White" CornerRadius="20" Padding="10,4" BorderBrush="#bbb" BorderThickness="1"
-                Margin="0,18,40,0" HorizontalAlignment="Right" Width="350" DockPanel.Dock="Top">
+                Margin="0,18,40,0" HorizontalAlignment="Right" Width="220" DockPanel.Dock="Top">
             <DockPanel>
                 <TextBlock Text="🔍" FontSize="16" VerticalAlignment="Center" Margin="0,0,6,0"/>
                 <TextBox x:Name="RechercheBox"
                          TextChanged="RechercheBox_TextChanged"
-                         Width="160"
+                         Width="180"
                          Style="{StaticResource SearchBoxStyle}"
                          ToolTip="Rechercher par plaque, nom ou marque"
                          />
-                <Button Content="Exporter en CSV"
-                        Click="ExporterCsv_Click"
-                        Margin="10,0,0,0"
-                        Style="{StaticResource ModernButton}"/>
             </DockPanel>
         </Border>
 
-        <!-- Popups centrés sous les boutons -->
         <Popup x:Name="PopupNouveaux"
-               PlacementTarget="{Binding ElementName=BtnNouveaux}"
-               Placement="Bottom"
-               StaysOpen="False"
-               AllowsTransparency="True"
-               PopupAnimation="Fade">
+            PlacementTarget="{Binding ElementName=BtnNouveaux}"
+            Placement="Bottom"
+            StaysOpen="False"
+            AllowsTransparency="True"
+            PopupAnimation="Fade">
             <Border Background="White" BorderBrush="Black" BorderThickness="1" Padding="20" CornerRadius="8" >
                 <StackPanel>
                     <TextBlock Text="Nouveaux" FontWeight="Bold" FontSize="16" Margin="5"/>
@@ -111,26 +148,26 @@
         </Popup>
 
         <Popup x:Name="PopupHistorique"
-               PlacementTarget="{Binding ElementName=BtnHistorique}"
-               Placement="Bottom"
-               StaysOpen="False"
-               AllowsTransparency="True"
-               PopupAnimation="Fade">
+            PlacementTarget="{Binding ElementName=BtnHistorique}"
+            Placement="Bottom"
+            StaysOpen="False"
+            AllowsTransparency="True"
+            PopupAnimation="Fade">
             <Border Background="White" BorderBrush="Blue" BorderThickness="2" Padding="20" CornerRadius="8">
                 <StackPanel>
                     <TextBlock Text="Historique" FontWeight="Bold" FontSize="16" Margin="5"/>
                     <Separator/>
                     <ListBox ItemsSource="{Binding Camions}" 
-                             SelectionChanged="FichierJson_SelectionChanged"
-                             Width="350" Height="200" Margin="5">
+                     SelectionChanged="FichierJson_SelectionChanged"
+                     Width="350" Height="200" Margin="5">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock>
-                                    <Run Text="{Binding Nom}" />
-                                    <Run Text=" (" />
-                                    <Run Text="{Binding Plaque}" />
-                                    <Run Text=")" />
-                                </TextBlock>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Nom}" />
+                                    <TextBlock Text=" (" />
+                                    <TextBlock Text="{Binding Plaque}" />
+                                    <TextBlock Text=")" />
+                                </StackPanel>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
@@ -138,7 +175,7 @@
             </Border>
         </Popup>
 
-            <!-- Tableau principal -->
+        <!-- Tableau principal -->
         <DataGrid x:Name="VehiculesGrid"
                   ItemsSource="{Binding Camions}"
                   AutoGenerateColumns="False"

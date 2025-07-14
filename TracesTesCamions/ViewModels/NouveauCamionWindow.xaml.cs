@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Win32;
+using TracesTesCamions.Data;
 using TracesTesCamions.Models;
 
 namespace TracesTesCamions.Views
@@ -14,51 +15,38 @@ namespace TracesTesCamions.Views
         public Camion? Result { get; private set; }
         private string? cheminDocumentRelatif;
         private readonly string? currentDataFolder;
+        private readonly ConfigurationData configData;
 
-        public ObservableCollection<string> Marques { get; } = new ObservableCollection<string>
-        {
-            "Renault", "Volvo", "Scania", "Mercedes", "MAN", "Iveco", "DAF", "Autre"
-        };
         public ObservableCollection<int> Annees { get; } = new ObservableCollection<int>();
-        public ObservableCollection<string> EntreprisesMaintenance { get; } = new ObservableCollection<string>
-        {
-            "Entreprise A", "Entreprise B", "Entreprise C"
-        };
-        public ObservableCollection<string> MarquesPneumatique { get; } = new ObservableCollection<string>
-        {
-            "Michelin", "Goodyear", "Bridgestone", "Continental", "Autre"
-        };
-        public ObservableCollection<string> TypesDepense { get; } = new ObservableCollection<string>
-        {
-            "Pneumatique", "Réparation", "Vidange", "Freins"
-        };
 
-        public NouveauCamionWindow(string? dataFolder)
+        public NouveauCamionWindow(string? dataFolder, ConfigurationData config)
         {
             InitializeComponent();
+            config.LoadAll();
             DataContext = this;
 
-            currentDataFolder = dataFolder ?? throw new ArgumentNullException(nameof(dataFolder), "Le dossier de données ne peut pas être null.");
+            currentDataFolder = dataFolder ?? throw new ArgumentNullException(nameof(dataFolder));
+            configData = config;
 
             int anneeCourante = DateTime.Now.Year;
             for (int i = anneeCourante; i >= 1980; i--)
                 Annees.Add(i);
 
-            MarqueVehiculeBox.ItemsSource = Marques;
+            MarqueVehiculeBox.ItemsSource = configData.MarquesVehicule;
             AnneeCreationBox.ItemsSource = Annees;
-            EntrepriseMaintenanceBox.ItemsSource = EntreprisesMaintenance;
-            MarquePneumatiqueBox.ItemsSource = MarquesPneumatique;
-            TypeDepenseBox.ItemsSource = TypesDepense;
+            EntrepriseMaintenanceBox.ItemsSource = configData.EntreprisesMaintenance;
+            MarquePneumatiqueBox.ItemsSource = configData.MarquesPneumatique;
+            TypeDepenseBox.ItemsSource = configData.TypesDepense;
 
-            if (Marques.Count > 0)
+            if (configData.MarquesVehicule.Count > 0)
                 MarqueVehiculeBox.SelectedIndex = 0;
             if (Annees.Count > 0)
                 AnneeCreationBox.SelectedIndex = 0;
-            if (EntreprisesMaintenance.Count > 0)
+            if (configData.EntreprisesMaintenance.Count > 0)
                 EntrepriseMaintenanceBox.SelectedIndex = 0;
-            if (MarquesPneumatique.Count > 0)
+            if (configData.MarquesPneumatique.Count > 0)
                 MarquePneumatiqueBox.SelectedIndex = 0;
-            if (TypesDepense.Count > 0)
+            if (configData.TypesDepense.Count > 0)
                 TypeDepenseBox.SelectedIndex = 0;
         }
 
@@ -218,5 +206,6 @@ namespace TracesTesCamions.Views
 
             File.Copy(imagePath, newFilePath, overwrite: true);
         }
+
     }
 }

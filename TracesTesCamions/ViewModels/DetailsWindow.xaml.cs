@@ -42,5 +42,22 @@ namespace TracesTesCamions.Views
                 }
             }
         }
+
+        private void ModifierVehicule_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is Camion camion)
+            {
+                // Ouvre une fenêtre de modification avec les infos du camion
+                var fenetreModif = new ModifierCamionWindow(camion); // À créer
+                fenetreModif.Owner = this;
+                if (fenetreModif.ShowDialog() == true)
+                {
+                    // Recharger les données si elles ont été modifiées
+                    DataContext = null;
+                    DataContext = camion;
+                }
+            }
+        }
+
     }
 }
