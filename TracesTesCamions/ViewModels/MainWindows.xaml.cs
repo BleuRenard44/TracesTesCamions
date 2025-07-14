@@ -34,13 +34,7 @@ namespace TracesTesCamions
             InitializeComponent();
             DataContext = this;
             LoadDataFolder();
-            if (string.IsNullOrEmpty(currentDataFolder) || !Directory.Exists(currentDataFolder))
-            {
-                System.Windows.MessageBox.Show(
-                    "Aucun dossier de données n'est défini. Veuillez choisir un dossier pour enregistrer vos données.",
-                    "Sélection du dossier", MessageBoxButton.OK, MessageBoxImage.Information);
-                NouveauJeuDeDonnees_Click(this, new RoutedEventArgs());
-            }
+            
             // Ajoute cette ligne pour charger les véhicules existants
             ChargerVehiculesDepuisFichiers();
         }
@@ -53,36 +47,57 @@ namespace TracesTesCamions
                 {
                     var json = File.ReadAllText(configPath);
                     config = JsonSerializer.Deserialize<ConfigurationData>(json);
-                    currentDataFolder = config?.CurrentDataFolder;
+
+                    // Si le chemin est vide ou invalide, relance proprement
+                    if (string.IsNullOrWhiteSpace(config?.CurrentDataFolder) || !Directory.Exists(config.CurrentDataFolder))
+                    {
+                        config = new ConfigurationData(); // Cela appellera ChoisirDossierDonnees() si besoin
+                        SaveDataFolder();
+                    }
                 }
+                else
+                {
+                    // Fichier de config absent → nouvelle instance
+                    config = new ConfigurationData();
+                    SaveDataFolder();
+                }
+
+                currentDataFolder = config.CurrentDataFolder;
             }
             catch
             {
-                // Ignorer les erreurs de lecture
-                config = new ConfigurationData(currentDataFolder ?? "");
+                // En cas d’erreur inattendue, force le fallback propre
+                config = new ConfigurationData();
+                currentDataFolder = config.CurrentDataFolder;
+                SaveDataFolder();
             }
         }
+
 
 
         private void SaveDataFolder()
         {
             try
             {
-                config = new ConfigurationData(currentDataFolder ?? "");
-                config.CurrentDataFolder = currentDataFolder;
+                if (config == null && !string.IsNullOrEmpty(currentDataFolder))
+                    config = new ConfigurationData(currentDataFolder);
 
-                var dir = Path.GetDirectoryName(configPath);
-                if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir!);
+                if (config != null)
+                {
+                    var dir = Path.GetDirectoryName(configPath);
+                    if (!Directory.Exists(dir))
+                        Directory.CreateDirectory(dir!);
 
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                File.WriteAllText(configPath, JsonSerializer.Serialize(config, options));
+                    var options = new JsonSerializerOptions { WriteIndented = true };
+                    File.WriteAllText(configPath, JsonSerializer.Serialize(config, options));
+                }
             }
             catch
             {
-                // Ignorer les erreurs d'écriture
+                // Silencieux
             }
         }
+
 
 
         private void BtnNouveaux_Click(object sender, RoutedEventArgs e)
@@ -107,15 +122,17 @@ namespace TracesTesCamions
         // Nouveau jeu de données : crée un dossier et sauvegarde le chemin
         private void NouveauJeuDeDonnees_Click(object sender, RoutedEventArgs e)
         {
-            var dlg = new System.Windows.Forms.FolderBrowserDialog
+            if (ConfigurationData.ChoisirDossierDonnees(out string? dossierChoisi))
             {
-                Description = "Choisissez ou créez le dossier pour le nouveau jeu de données"
-            };
-            if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                currentDataFolder = dlg.SelectedPath;
+                currentDataFolder = dossierChoisi;
+                var config = new ConfigurationData(currentDataFolder);
                 SaveDataFolder();
-                System.Windows.MessageBox.Show($"Dossier sélectionné : {currentDataFolder}", "Nouveau jeu de données", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                System.Windows.MessageBox.Show($"Dossier sélectionné : {currentDataFolder}",
+                    "Nouveau jeu de données",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+
                 ChargerVehiculesDepuisFichiers();
             }
         }
@@ -126,11 +143,11 @@ namespace TracesTesCamions
             if (string.IsNullOrEmpty(currentDataFolder) || !Directory.Exists(currentDataFolder))
             {
                 System.Windows.MessageBox.Show(
-                    "Aucun dossier de données n'est défini. Veuillez choisir un dossier pour enregistrer vos données.",
-                    "Sélection du dossier", MessageBoxButton.OK, MessageBoxImage.Information);
-                NouveauJeuDeDonnees_Click(this, new RoutedEventArgs());
+                    "Erreur : aucun dossier de données trouvé dans la configuration.",
+                    "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+
 
             var win = new NouveauCamionWindow(currentDataFolder, config) { Owner = this };
             if (win.ShowDialog() == true && win.Result != null)
@@ -155,8 +172,18 @@ namespace TracesTesCamions
 
                 // Ajoute un événement de révision au calendrier
                 string eventId = await GoogleCalendarHelper.AddRevisionEventAsync(
-                    win.Result.Nom, win.Result.Plaque, win.Result.DateProchaineRevision, win.Result.HeureProchaineRevision);
+                    win.Result.Nom,
+                    win.Result.Marque,
+                    win.Result.Plaque,
+                    win.Result.EntrepriseMaintenance,
+                    win.Result.TypeMaintenance,
+                    win.Result.TypeDepense,
+                    win.Result.DateProchaineRevision,
+                    win.Result.HeureProchaineRevision
+                );
+
                 win.Result.CalendarEventId = eventId;
+
 
                 ChargerFichiersJson();
             }
@@ -395,18 +422,18 @@ namespace TracesTesCamions
 
             var entreprises = new ObservableCollection<Entreprise>();
             var fichierPath = Path.Combine(currentDataFolder, "entreprises.json");
+
             if (File.Exists(fichierPath))
             {
                 var data = JsonSerializer.Deserialize<Entreprise[]>(File.ReadAllText(fichierPath));
                 if (data != null)
                 {
+                    foreach (var en in data)
+                        entreprises.Add(en);
                 }
             }
 
             var entreprisesWindow = new GererEntreprisesWindow(entreprises, currentDataFolder);
-
-            {
-            };
             entreprisesWindow.ShowDialog();
             RechargerConfiguration();
         }

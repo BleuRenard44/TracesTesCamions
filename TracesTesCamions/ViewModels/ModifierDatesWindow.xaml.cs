@@ -68,12 +68,17 @@ namespace TracesTesCamions.Views
                 // Ajouter le nouvel événement
                 string eventId = await GoogleCalendarHelper.AddRevisionEventAsync(
                     _camion.Nom,
+                    _camion.Marque,
                     _camion.Plaque,
+                    _camion.EntrepriseMaintenance,
+                    _camion.TypeMaintenance,
+                    _camion.TypeDepense,
                     _camion.DateProchaineRevision,
                     _camion.HeureProchaineRevision
                 );
 
                 _camion.CalendarEventId = eventId;
+
             }
             catch (Exception ex)
             {

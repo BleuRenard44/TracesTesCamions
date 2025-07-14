@@ -14,10 +14,9 @@ namespace TracesTesCamions.Utils
     public static class GoogleCalendarHelper
     {
         private static CalendarService? _googleCalendarService;
+        private static string? _cachedCalendarId;
+        private const string CalendarName = "TracesTesCamions";
 
-        /// <summary>
-        /// Initialise et retourne le service Google Calendar authentifié.
-        /// </summary>
         private static async Task<CalendarService> GetGoogleCalendarServiceAsync()
         {
             if (_googleCalendarService != null)
@@ -48,20 +47,64 @@ namespace TracesTesCamions.Utils
             return _googleCalendarService;
         }
 
-        /// <summary>
-        /// Ajoute un événement de révision au calendrier Google et retourne l'ID de l'événement.
-        /// </summary>
-        public static async Task<string> AddRevisionEventAsync(string nom, string plaque, DateTime date, TimeSpan? heure)
+        private static async Task<string> GetOrCreateCalendarIdAsync()
+        {
+            if (!string.IsNullOrEmpty(_cachedCalendarId))
+                return _cachedCalendarId;
+
+            var service = await GetGoogleCalendarServiceAsync();
+            var calendarList = await service.CalendarList.List().ExecuteAsync();
+
+            foreach (var calendar in calendarList.Items)
+            {
+                if (calendar.Summary == CalendarName)
+                {
+                    _cachedCalendarId = calendar.Id!;
+                    return _cachedCalendarId;
+                }
+            }
+
+            var newCalendar = new Calendar
+            {
+                Summary = CalendarName,
+                TimeZone = "Europe/Paris"
+            };
+
+            var createdCalendar = await service.Calendars.Insert(newCalendar).ExecuteAsync();
+            _cachedCalendarId = createdCalendar.Id!;
+            return _cachedCalendarId;
+        }
+
+        public static async Task<string> AddRevisionEventAsync(
+            string nomVehicule,
+            string marque,
+            string plaque,
+            string entreprise,
+            string typeMaintenance,
+            string typeDepense,
+            DateTime date,
+            TimeSpan? heure)
         {
             var service = await GetGoogleCalendarServiceAsync();
+            var calendarId = await GetOrCreateCalendarIdAsync();
 
-            string summary = $"Révision : {nom} ({plaque})";
             var startDateTime = date.Date + (heure ?? TimeSpan.Zero);
             var endDateTime = startDateTime.AddHours(1);
+
+            var summary = $"Maintenance - {entreprise} : {nomVehicule} ({plaque})";
+
+            var description =
+$@"Véhicule : {nomVehicule}
+Marque : {marque}
+Plaque : {plaque}
+Entreprise : {entreprise}
+Type de maintenance : {typeMaintenance}
+Type de dépense : {typeDepense}";
 
             var @event = new Event()
             {
                 Summary = summary,
+                Description = description,
                 Start = new EventDateTime()
                 {
                     DateTime = startDateTime,
@@ -87,78 +130,77 @@ namespace TracesTesCamions.Utils
 
             try
             {
-                var createdEvent = await service.Events.Insert(@event, "primary").ExecuteAsync();
-                Console.WriteLine($"Événement Google (avec heure) créé avec succès. ID : {createdEvent.Id}");
-                return createdEvent.Id;
+                var createdEvent = await service.Events.Insert(@event, calendarId).ExecuteAsync();
+                Console.WriteLine($"Événement ajouté avec ID : {createdEvent.Id}");
+                return createdEvent.Id!;
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"Erreur Google OAuth : {ex.Message}", "Erreur Google", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erreur lors de la création de l'événement : {ex.Message}", "Erreur Google", MessageBoxButton.OK, MessageBoxImage.Error);
                 throw;
             }
         }
 
-        /// <summary>
-        /// Supprime un événement du calendrier Google par son ID.
-        /// </summary>
         public static async Task DeleteEventAsync(string eventId)
         {
             var service = await GetGoogleCalendarServiceAsync();
-            string calendarId = "primary";
+            var calendarId = await GetOrCreateCalendarIdAsync();
 
             try
             {
-                var calendarService = await GetGoogleCalendarServiceAsync();
-                string userCalendarId = "primary";
-
-                // Récupère l'événement
-                var getRequest = calendarService.Events.Get(userCalendarId, eventId);
-                var existingEvent = await getRequest.ExecuteAsync();
-
-                // Supprime l'événement
-                var deleteRequest = calendarService.Events.Delete(userCalendarId, eventId);
-                await deleteRequest.ExecuteAsync();
+                await service.Events.Delete(calendarId, eventId).ExecuteAsync();
             }
             catch (Google.GoogleApiException ex)
             {
-                // Ignore si l’événement est introuvable
                 if (ex.HttpStatusCode != System.Net.HttpStatusCode.NotFound)
                     throw;
             }
         }
 
-        public static async Task EnsureGoogleAuthAsync()
-        {
-            await GetGoogleCalendarServiceAsync();
-        }
-
-        public static async Task<bool> UpdateEventAsync(string eventId, string nom, string plaque, DateTime date, TimeSpan? heure)
+        public static async Task<bool> UpdateEventAsync(
+            string eventId,
+            string nomVehicule,
+            string marque,
+            string plaque,
+            string entreprise,
+            string typeMaintenance,
+            string typeDepense,
+            DateTime date,
+            TimeSpan? heure)
         {
             try
             {
                 var service = await GetGoogleCalendarServiceAsync();
+                var calendarId = await GetOrCreateCalendarIdAsync();
 
-                // Récupère l'événement existant
-                var existingEvent = await service.Events.Get("primary", eventId).ExecuteAsync();
+                var existingEvent = await service.Events.Get(calendarId, eventId).ExecuteAsync();
                 if (existingEvent == null) return false;
 
-                // Modifie les champs
-                existingEvent.Summary = $"Révision - {nom} ({plaque})";
+                var startDateTime = date.Date + (heure ?? TimeSpan.Zero);
+                var endDateTime = startDateTime.AddHours(1);
 
-                if (heure.HasValue)
-                {
-                    var dateTime = date.Date + heure.Value;
-                    existingEvent.Start = new EventDateTime { DateTime = dateTime, TimeZone = "Europe/Paris" };
-                    existingEvent.End = new EventDateTime { DateTime = dateTime.AddHours(1), TimeZone = "Europe/Paris" };
-                }
-                else
-                {
-                    existingEvent.Start = new EventDateTime { Date = date.ToString("yyyy-MM-dd") };
-                    existingEvent.End = new EventDateTime { Date = date.ToString("yyyy-MM-dd") };
-                }
+                existingEvent.Summary = $"Maintenance - {entreprise} : {nomVehicule} ({plaque})";
 
-                // Met à jour l'événement
-                await service.Events.Update(existingEvent, "primary", eventId).ExecuteAsync();
+                existingEvent.Description =
+$@"Véhicule : {nomVehicule}
+Marque : {marque}
+Plaque : {plaque}
+Entreprise : {entreprise}
+Type de maintenance : {typeMaintenance}
+Type de dépense : {typeDepense}";
+
+                existingEvent.Start = new EventDateTime
+                {
+                    DateTime = startDateTime,
+                    TimeZone = "Europe/Paris"
+                };
+                existingEvent.End = new EventDateTime
+                {
+                    DateTime = endDateTime,
+                    TimeZone = "Europe/Paris"
+                };
+
+                await service.Events.Update(existingEvent, calendarId, eventId).ExecuteAsync();
                 return true;
             }
             catch (Google.GoogleApiException ex)
@@ -170,6 +212,9 @@ namespace TracesTesCamions.Utils
             }
         }
 
-
+        public static async Task EnsureGoogleAuthAsync()
+        {
+            await GetGoogleCalendarServiceAsync();
+        }
     }
 }
