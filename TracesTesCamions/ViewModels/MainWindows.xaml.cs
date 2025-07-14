@@ -329,17 +329,34 @@ namespace TracesTesCamions
                 Filter = "CSV (*.csv)|*.csv",
                 FileName = "vehicules.csv"
             };
+
             if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 using var sw = new StreamWriter(dlg.FileName, false, System.Text.Encoding.UTF8);
-                sw.WriteLine("Plaque;Marque;Nom;Année de création;Dernière révision;Prochaine révision");
+
+                // Entêtes CSV
+                sw.WriteLine("Plaque;Marque;Nom;Année de création;Date création complète;Dernière révision;Prochaine révision;Heure prochaine révision;Entreprise maintenance;Type maintenance;Type dépense;Notes;ID Événement Calendar");
+
                 foreach (var c in camions)
                 {
-                    sw.WriteLine($"{c.Plaque};{c.Marque};{c.Nom};{c.DateCreation:yyyy};{c.DateDerniereRevision:dd/MM/yy};{c.DateProchaineRevision:dd/MM/yy}");
+                    sw.WriteLine($"{c.Plaque};" +
+                                 $"{c.Marque};" +
+                                 $"{c.Nom};" +
+                                 $"{c.DateCreation:yyyy};" +
+                                 $"{c.DateCreation:dd/MM/yyyy};" +
+                                 $"{c.DateDerniereRevision:dd/MM/yyyy};" +
+                                 $"{c.DateProchaineRevision:dd/MM/yyyy};" +
+                                 $"{c.HeureProchaineRevision:hh\\:mm};" +
+                                 $"{c.EntrepriseMaintenance};" +
+                                 $"{c.TypeMaintenance};" +
+                                 $"{c.TypeDepense};" +
+                                 $"{c.CalendarEventId}");
                 }
+
                 System.Windows.MessageBox.Show("Export terminé.", "Export CSV", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
+
 
         public event PropertyChangedEventHandler? PropertyChanged;
         protected void OnPropertyChanged(string name) =>
