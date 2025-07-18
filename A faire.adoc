@@ -1,4 +1,4 @@
-\*Type Financement :
+*Type Financement :
 
 
 
@@ -55,7 +55,7 @@ Type alertes :
 
 
 
-Type de maintenace :
+Type de maintenance :
 
 
 
@@ -63,11 +63,11 @@ Type de maintenace :
 
 
 
-Entreprise Maintenance :
+Entreprise de Maintenance :
 
 
 
-* 6 voir plus (volet options pour ajouter et supprimer des entreprise, pouvoir exporter uniquement les véhicule de 	l'entreprise)
+* 6 voir plus (volet options pour ajouter et supprimer des entreprises, pouvoir exporter uniquement les véhicules de 	l'entreprise)
 
 
 
